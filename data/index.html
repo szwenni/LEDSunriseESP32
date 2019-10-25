@@ -1,0 +1,267 @@
+<html>
+  <head>      
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>LED</title>
+    <style>
+      .dot {
+        height: 30px;
+        width: 30px;
+        min-height: 30px;
+        min-width: 30px;
+        max-height: 30px;
+        max-width: 30px;
+        border-radius: 50%;
+        display: inline-block;
+        border-style: solid;
+        text-align: center;
+        padding-top: 0.27rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="color" class="mt-5 ml-5 mr-5">
+      <div id="colorRow0" class="row mb-3">
+        <div class="col"></div>
+        <div class="col-2 ml-1 mr-1" id="brightUp"><span class="dot"><span class="m-auto fa fa-angle-up"></span></span></div>
+        <div class="col-2 ml-1 mr-1" id="brightDown"><span class="dot"><span class="m-auto fa fa-angle-down"></span></span></div>
+        <div class="col-2 ml-1 mr-1" id="power"><span class="dot"><span class="m-auto fa fa-power-off"></span></span></div>
+        <div class="col-2 ml-1 mr-1"></div>
+        <div class="col"></div>
+      </div>
+    </div>
+    <button id="update" class="btn btn-primary ml-3">Update Timers</button>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+      $(document).ready(function(){
+        $('#brightDown').click(function(event) {
+            $.post("/rest/brightDown", "", null, "json");
+        });
+        $('#brightUp').click(function(event) {
+            $.post("/rest/brightUp", "", null, "json");
+        });
+        $('#power').click(function(event) {
+          rgbReq = {};
+            rgbReq["r"] = 0;
+            rgbReq["g"] = 0;
+            rgbReq["b"] = 0;
+            $.ajax({url: "/rest/color",
+                    type: "POST",
+                    data: JSON.stringify(rgbReq), 
+                    success: null,
+                    dataType: "json",
+                    contentType: "application/json"
+                   });
+        });
+        colors = getColors();
+        rows = 0;
+        for(i=0;i<colors.length;i++) {
+          if(i % 4 == 0) {
+            rows++;
+            $('#color').append('<div id="colorRow'+rows+'" class="row mb-3"><div class="col"></div><div id="spacerAfter'+rows+'" class="col"></div></div>');
+          }
+          newDiv = $( '<div id="colorElement"'+i+' class="col-2 ml-1 mr-1 colorElement"><span class="dot" style="background-color: #'+colors[i]+'"></span></div>' );
+          newDiv.click(function(event) {
+            rgb = $(event.delegateTarget).find('span.dot').first().css("background-color").replace("rgb", "").replace("(", "").replace(")", "").split(",");
+            rgbReq = {};
+            rgbReq["r"] = parseInt(rgb[0].trim());
+            rgbReq["g"] = parseInt(rgb[1].trim());
+            rgbReq["b"] = parseInt(rgb[2].trim());
+            console.log(JSON.stringify(rgbReq));
+            $.ajax({url: "/rest/color",
+                    type: "POST",
+                    data: JSON.stringify(rgbReq), 
+                    success: null,
+                    dataType: "json",
+                    contentType: "application/json"
+                   });
+          });
+          $('#spacerAfter'+rows).before(newDiv);
+        }
+        $.ajax({ url: "/rest/config",
+          context: document.body,
+          dataType: "json",
+          success: function(data){
+            sunConfig = generateSunUp(data);
+            sunConfig.find('#sunup').first().val(data.SUNRISE_LENGTH);
+            sunConfig.find('#sundown').first().val(data.SUNDOWN_LENGTH);
+            $('#color').after(sunConfig);
+            $('#color').after(generateTimer(data.SunTimers.Sunday));
+            $('#color').after(generateTimer(data.SunTimers.Saturday));
+            $('#color').after(generateTimer(data.SunTimers.Friday));
+            $('#color').after(generateTimer(data.SunTimers.Thursday));
+            $('#color').after(generateTimer(data.SunTimers.Wednesday));
+            $('#color').after(generateTimer(data.SunTimers.Tuesday));
+            $('#color').after(generateTimer(data.SunTimers.Monday));
+            $('#update').click(function(event) {
+              console.log("clicked");
+              newData = {};
+              newData["SunTimers"] = {};
+              newData["SunTimers"]["Monday"] = getDataForDay("Monday");
+              newData["SunTimers"]["Tuesday"] = getDataForDay("Tuesday");
+              newData["SunTimers"]["Wednesday"] = getDataForDay("Wednesday");
+              newData["SunTimers"]["Thursday"] = getDataForDay("Thursday");
+              newData["SunTimers"]["Friday"] = getDataForDay("Friday");
+              newData["SunTimers"]["Saturday"] = getDataForDay("Saturday");
+              newData["SunTimers"]["Sunday"] = getDataForDay("Sunday");
+              newData.SUNRISE_LENGTH = parseInt($('#sunup').first().val());
+              newData.SUNDOWN_LENGTH = parseInt($('#sundown').first().val());
+              console.log(newData);
+              $.ajax({
+                type: "POST",
+                url: "/rest/config",
+                data: JSON.stringify(newData),
+                contentType: "application/json",
+                success: function(data) {
+                    console.log("success");
+                  },
+                dataType: 'json'
+              });
+            });
+          }});
+        });
+      function generateTimer(sunTimer) {
+          active = generateActive();
+        if(sunTimer.enabled) {
+          active.find('#active').prop('checked', true);
+        }
+        
+          timer = $('<div class="ml-2"><h5>'+sunTimer.dayOfWeek+'</h5>' +
+          '<div id="'+sunTimer.dayOfWeek+'">' + 
+            generateUpDown('Up', 'Aufgang', sunTimer.hoursUp, sunTimer.minutesUp) + 
+            generateUpDown('Down', 'Untergang', sunTimer.hoursDown, sunTimer.minutesDown) +'</div></div>');
+          timer.find('#'+sunTimer.dayOfWeek).append(active);
+        return timer; 
+      }
+      
+      function generateUpDown(id, description, hours, minutes) {
+          return '<div class="form-inline ml-2">' +
+          '  <div class="form-group mb-2">' + 
+          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
+          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="'+description+'">' + 
+          '  </div>' + 
+          '  <div class="form-group mx-sm-3 mb-2">' + 
+          '    <label for="hour'+id+'" class="sr-only">Stunde</label>' + 
+          '    <select  class="form-control" id="hour'+id+'">' +
+          getHourOptions(hours)+
+          '     </select>'+
+          '  </div>' + 
+          '  <div id="minuteSelection'+id+'" class="form-group mx-sm-3 mb-2">' + 
+          '    <label for="minute'+id+'" class="sr-only">Minute</label>' + 
+          '    <select class="form-control" id="minute'+id+'">' +
+          getMinuteOptions(minutes)+
+          '     </select>'+
+          '  </div>' +
+          '</div>';
+      }
+      
+      function generateActive() {
+        return $('<div class="form-inline ml-2">' +
+          '  <div class="form-group mb-2">' + 
+          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
+          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="Aktiviert">' + 
+          '  </div>' + 
+          '  <div class="form-group mx-sm-3 mb-2">' +
+          '    <label for="active" class="sr-only">Aktiviert</label>' +
+          '    <input type="checkbox" class="" id="active">' +
+          '  </div></div>');
+      }
+      
+      function generateSunUp() {
+        return $('<div class="ml-2"><h5>Sonnenaufgang / Sonnenuntergang</h5>'+
+          '<div class="form-inline ml-2">' +
+          '  <div class="form-group mb-2">' + 
+          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
+          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="Sonnenaufgang Länge">' + 
+          '  </div>' + 
+          '  <div class="form-group mx-sm-3 mb-2">' +
+          '    <label for="active" class="sr-only">Aktiviert</label>' +
+          '    <input type="number" class="form-group" id="sunup">' +
+          '  </div></div>'+
+          '<div class="form-inline ml-2">' +
+          '  <div class="form-group mb-2">' + 
+          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
+          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="Sonnenuntergang Länge">' + 
+          '  </div>' + 
+          '  <div class="form-group mx-sm-3 mb-2">' +
+          '    <label for="active" class="sr-only">Aktiviert</label>' +
+          '    <input type="number" class="form-group" id="sundown">' +
+          '  </div></div>'+
+          '</div>');
+      }
+      
+      function getHourOptions(selected) {
+        ret = '';
+        for (const x of Array(24).keys()) {
+          if(selected == x) {
+            ret += '<option selected value="'+x+'">'+x+'</option>';
+          } else {
+            
+          
+            ret += '<option value="'+x+'">'+x+'</option>';
+          }
+        }
+        return ret;
+      }
+      
+      function getMinuteOptions(selected) {
+        ret = '';
+        for (const x of Array(60).keys()) {
+          if(selected == x) {
+            ret += '<option selected value="'+x+'">'+x+'</option>';
+          } else {
+            
+          
+            ret += '<option value="'+x+'">'+x+'</option>';
+          }
+        }
+        return ret;
+      }
+      
+      function getDataForDay(day) {
+        ret = {};
+        ret["dayOfWeek"] = day;
+        ret["hoursUp"] = $('#'+day).find('#hourUp').val();
+        ret["minutesUp"] = $('#'+day).find('#minuteUp').val();
+        ret["hoursDown"] = $('#'+day).find('#hourDown').val();
+        ret["minutesDown"] = $('#'+day).find('#minuteDown').val();
+        if($('#'+day).find('#active').prop('checked')) {
+          ret["enabled"] = true;
+        } else {
+          ret["enabled"] = false;
+        }
+        return ret;
+      }
+      
+      function getColors() {
+        ret = [];
+        ret.push("ff0000");
+        ret.push("008000");
+        ret.push("0000cd");
+        ret.push("FFFFFF");
+        ret.push("ff6910");
+        ret.push("00ff00");
+        ret.push("0000ff");
+        ret.push("ffb6c1");
+        ret.push("ffa500");
+        ret.push("00ffff");
+        ret.push("c71585");
+        ret.push("ffb6c1");
+        ret.push("fdb27d");
+        ret.push("00ced1");
+        ret.push("da70d6");
+        ret.push("87ceeb");
+        ret.push("ffff00");
+        
+        
+        ret.push("028a8c");
+        ret.push("ff72ba");
+        ret.push("87ceeb");
+        return ret;
+      }
+    </script>
+  </body>
+</html>
