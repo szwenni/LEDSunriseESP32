@@ -1,37 +1,139 @@
 <html>
-  <head>      
-    <meta charset="UTF-8">
+  <head>
+    <link rel="icon" sizes="192x192" href="logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>LED</title>
+    <meta charset="UTF-8">
     <style>
       .dot {
-        height: 30px;
-        width: 30px;
-        min-height: 30px;
-        min-width: 30px;
-        max-height: 30px;
-        max-width: 30px;
+        height: 5rem;
+        width: 5rem;
+        min-height: 5rem;
+        min-width: 5rem;
+        max-height: 5rem;
+        max-width: 5rem;
         border-radius: 50%;
         display: inline-block;
         border-style: solid;
         text-align: center;
         padding-top: 0.27rem;
+        font-size: 4.3rem !important;
       }
+      @media (max-width: 992px) {
+        .btn {
+            font-size: xx-large !important;
+        }
+        
+        h4 {
+          line-height: unset;
+          font-size: 3rem !important;
+        }
+        
+        h5 {
+          font-size: 3rem;
+        }
+        
+        select, label, #sunup, #sundown {
+            font-size: 2rem !important;
+        }
+        
+        
+      #mainCenter {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667% !important;
+      }
+        
+      #showConfigButton {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667% !important;
+      }
+      }
+      @media (min-width: 992px) {
+        #mainCenter {
+          flex: 0 0 66.666667%;
+          max-width: 66.666667% !important;
+        }
+        
+        #showConfigButton {
+          flex: 0 0 66.666667%;
+          max-width: 66.666667% !important;
+        }
+        
+        #active {
+          width: auto;
+        }
+      }
+      
+      
     </style>
   </head>
   <body>
-    <div id="color" class="mt-5 ml-5 mr-5">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">LED</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="/">LED <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/mqtt">Mqtt Config</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/updateFile">Update File</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/update">OTA Update</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div id="color" class="mt-5 ml-5 mr-5 text-center">
       <div id="colorRow0" class="row mb-3">
-        <div class="col"></div>
-        <div class="col-2 ml-1 mr-1" id="brightUp"><span class="dot"><span class="m-auto fa fa-angle-up"></span></span></div>
-        <div class="col-2 ml-1 mr-1" id="brightDown"><span class="dot"><span class="m-auto fa fa-angle-down"></span></span></div>
-        <div class="col-2 ml-1 mr-1" id="power"><span class="dot"><span class="m-auto fa fa-power-off"></span></span></div>
-        <div class="col-2 ml-1 mr-1"></div>
-        <div class="col"></div>
+        <div class="col ml-1 mr-1" id="brightUp"><span class="dot"><span class="m-auto fa fa-angle-up"></span></span></div>
+        <div class="col ml-1 mr-1" id="brightDown"><span class="dot"><span class="m-auto fa fa-angle-down"></span></span></div>
+        <div class="col ml-1 mr-1" id="power"><span class="dot"><span class="m-auto fa fa-power-off"></span></span></div>
+        <div class="col ml-1 mr-1"></div>
       </div>
     </div>
-    <button id="update" class="btn btn-primary ml-3">Update Timers</button>
+    <div id="actColorRow" class="row mt-5 mb-5 ml-0 mr-0">
+      <div id="actColorLeft" class="col"></div>
+      <div id="actColorCenter" class="col-8">
+        <div class="row text-center">
+          <h4 class="col-8">Aktuelle Farbe:</h4>
+          <div class="col-4" ><span class="dot" id="actColor"></span></div>
+        </div>
+      </div>
+      <div id="actColorRight" class="col"></div>
+    </div>
+    <div id="statusRow" class="row mt-5 mb-5 ml-0 mr-0">
+      <div id="statusLeft" class="col"></div>
+      <div id="statusCenter" class="col-8">
+      </div>
+      <div id="statusRight" class="col"></div>
+    </div>
+    <div class="row mb-2 ml-0 mr-0">
+      <div class="col"></div>
+      <button class="btn btn-light col" id="showConfigButton" type="button" data-toggle="collapse" data-target="#configCollapse" aria-expanded="false" aria-controls="configCollapse">
+      Konfiguration anzeigen
+      </button>
+      <div class="col"></div>
+    </div>
+    <div class="collapse" id="configCollapse">
+      <div class="row">
+        <div id="mainSpacerLeft" class="col"></div>
+        <div id="mainCenter" class="col-8 card card-body"></div>
+        <div id="mainSpacerRight" class="col"></div>
+      </div>
+      
+    </div>
+    <div class="mt-3 ml-3">
+      <span class="text-secondary"><small>V 1.1</small></span>
+    </div>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -61,26 +163,29 @@
         for(i=0;i<colors.length;i++) {
           if(i % 4 == 0) {
             rows++;
-            $('#color').append('<div id="colorRow'+rows+'" class="row mb-3"><div class="col"></div><div id="spacerAfter'+rows+'" class="col"></div></div>');
+            $('#color').append('<div id="colorRow'+rows+'" class="row mb-3"></div>');
           }
-          newDiv = $( '<div id="colorElement"'+i+' class="col-2 ml-1 mr-1 colorElement"><span class="dot" style="background-color: #'+colors[i]+'"></span></div>' );
+          newDiv = $( '<div id="colorElement"'+i+' class="col ml-1 mr-1 colorElement"><span class="dot" style="background-color: #'+colors[i]+'"></span></div>' );
           newDiv.click(function(event) {
             rgb = $(event.delegateTarget).find('span.dot').first().css("background-color").replace("rgb", "").replace("(", "").replace(")", "").split(",");
             rgbReq = {};
             rgbReq["r"] = parseInt(rgb[0].trim());
             rgbReq["g"] = parseInt(rgb[1].trim());
             rgbReq["b"] = parseInt(rgb[2].trim());
-            console.log(JSON.stringify(rgbReq));
             $.ajax({url: "/rest/color",
                     type: "POST",
                     data: JSON.stringify(rgbReq), 
-                    success: null,
+                    success: function() {
+                      getActColor();
+                    },
                     dataType: "json",
                     contentType: "application/json"
                    });
           });
-          $('#spacerAfter'+rows).before(newDiv);
+          $('#colorRow'+rows).append(newDiv);
         }
+        getActColor();
+        getStatus();
         $.ajax({ url: "/rest/config",
           context: document.body,
           dataType: "json",
@@ -88,16 +193,16 @@
             sunConfig = generateSunUp(data);
             sunConfig.find('#sunup').first().val(data.SUNRISE_LENGTH);
             sunConfig.find('#sundown').first().val(data.SUNDOWN_LENGTH);
-            $('#color').after(sunConfig);
-            $('#color').after(generateTimer(data.SunTimers.Sunday));
-            $('#color').after(generateTimer(data.SunTimers.Saturday));
-            $('#color').after(generateTimer(data.SunTimers.Friday));
-            $('#color').after(generateTimer(data.SunTimers.Thursday));
-            $('#color').after(generateTimer(data.SunTimers.Wednesday));
-            $('#color').after(generateTimer(data.SunTimers.Tuesday));
-            $('#color').after(generateTimer(data.SunTimers.Monday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Monday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Tuesday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Wednesday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Thursday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Friday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Saturday));
+            $('#mainCenter').append(generateTimer(data.SunTimers.Sunday));
+            $('#mainCenter').append(sunConfig);
+            $('#mainCenter').append('<button id="update" class="mt-5 btn btn-primary">Update Timers</button>');
             $('#update').click(function(event) {
-              console.log("clicked");
               newData = {};
               newData["SunTimers"] = {};
               newData["SunTimers"]["Monday"] = getDataForDay("Monday");
@@ -116,7 +221,8 @@
                 data: JSON.stringify(newData),
                 contentType: "application/json",
                 success: function(data) {
-                    console.log("success");
+                    $('#configCollapse').collapse('toggle');
+                    alert("Erfolgreich aktualisiert");
                   },
                 dataType: 'json'
               });
@@ -129,68 +235,109 @@
           active.find('#active').prop('checked', true);
         }
         
-          timer = $('<div class="ml-2"><h5>'+sunTimer.dayOfWeek+'</h5>' +
+          timer = $('<div class="text-center col"><h5>'+sunTimer.dayOfWeek+'</h5>' +
           '<div id="'+sunTimer.dayOfWeek+'">' + 
             generateUpDown('Up', 'Aufgang', sunTimer.hoursUp, sunTimer.minutesUp) + 
             generateUpDown('Down', 'Untergang', sunTimer.hoursDown, sunTimer.minutesDown) +'</div></div>');
           timer.find('#'+sunTimer.dayOfWeek).append(active);
         return timer; 
       }
+
+      function addStopButtons(sunrise, sundown) {
+        if(sunrise) {
+          $('#stopButton').click(function(event) {
+            $.post("/rest/stopSunup", "", null, "json");
+          });
+        }
+        if(sundown) {
+          $('#stopButton').click(function(event) {
+            $.post("/rest/stopSundown", "", null, "json");
+          });
+        }
+      }
       
       function generateUpDown(id, description, hours, minutes) {
-          return '<div class="form-inline ml-2">' +
-          '  <div class="form-group mb-2">' + 
-          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
-          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="'+description+'">' + 
-          '  </div>' + 
-          '  <div class="form-group mx-sm-3 mb-2">' + 
-          '    <label for="hour'+id+'" class="sr-only">Stunde</label>' + 
-          '    <select  class="form-control" id="hour'+id+'">' +
-          getHourOptions(hours)+
-          '     </select>'+
-          '  </div>' + 
-          '  <div id="minuteSelection'+id+'" class="form-group mx-sm-3 mb-2">' + 
-          '    <label for="minute'+id+'" class="sr-only">Minute</label>' + 
-          '    <select class="form-control" id="minute'+id+'">' +
-          getMinuteOptions(minutes)+
-          '     </select>'+
-          '  </div>' +
-          '</div>';
+      return '<div class="">'+
+        '<div class="row mb-2">' +
+        ' <div class="col-4 mt-auto mb-auto">' +
+        '   <label>'+description+'</label>' +
+        ' </div>' +
+        ' <div class="col-4">' +
+        '   <select  class="form-control" id="hour'+id+'">' +
+              getHourOptions(hours)+
+        '   </select>'+
+        ' </div>' +
+        ' <div class="col-4">' +
+        '   <select  class="form-control" id="minute'+id+'">' +
+              getMinuteOptions(minutes)+
+        '   </select>'+
+        ' </div>' +
+        '</div>';
+        
+      
       }
       
       function generateActive() {
-        return $('<div class="form-inline ml-2">' +
-          '  <div class="form-group mb-2">' + 
-          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
-          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="Aktiviert">' + 
-          '  </div>' + 
-          '  <div class="form-group mx-sm-3 mb-2">' +
-          '    <label for="active" class="sr-only">Aktiviert</label>' +
-          '    <input type="checkbox" class="" id="active">' +
-          '  </div></div>');
+        return $('<div class="row">' +
+                '   <div class="col-4">' +
+                '    <label>Aktiviert</label>' +
+                '   </div>' +
+                '   <div class="col mt-auto mb-auto">' +
+                '    <input type="checkbox" class="form-control" id="active">' +
+                '   </div>' +
+                ' </div>'
+                );
       }
       
       function generateSunUp() {
-        return $('<div class="ml-2"><h5>Sonnenaufgang / Sonnenuntergang</h5>'+
-          '<div class="form-inline ml-2">' +
-          '  <div class="form-group mb-2">' + 
-          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
-          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="Sonnenaufgang Länge">' + 
-          '  </div>' + 
-          '  <div class="form-group mx-sm-3 mb-2">' +
-          '    <label for="active" class="sr-only">Aktiviert</label>' +
-          '    <input type="number" class="form-group" id="sunup">' +
-          '  </div></div>'+
-          '<div class="form-inline ml-2">' +
-          '  <div class="form-group mb-2">' + 
-          '    <label for="staticEmail2" class="sr-only">Email</label>' + 
-          '    <input type="text" readonly class="form-control-plaintext" id="staticEmail2" value="Sonnenuntergang Länge">' + 
-          '  </div>' + 
-          '  <div class="form-group mx-sm-3 mb-2">' +
-          '    <label for="active" class="sr-only">Aktiviert</label>' +
-          '    <input type="number" class="form-group" id="sundown">' +
-          '  </div></div>'+
-          '</div>');
+        return $('<div class="text-center mt-5"><h5>Auf/Untergang Länge</h5>' +
+                '   <div class="row mb-2">' +
+                '     <div class="col-8 mt-auto mb-auto">' +
+                '     <label>Sonnenaufgang Länge</label>' +
+                '     </div>' +
+                '     <div class="col-4">' +
+                '       <input type="number" class="form-control" id="sunup">' +
+                '     </div>' +
+                '   </div>'+
+                '   <div class="row">' +
+                '     <div class="col-8 mt-auto mb-auto">' +
+                '     <label>Sonnenuntergang Länge</label>' +
+                '     </div>' +
+                '     <div class="col-4">' +
+                '       <input type="number" class="form-control" id="sundown">' +
+                '     </div>' +
+                '   </div>'+
+                ' </div>'
+                );
+      }
+      
+      function getStatus() {
+        $.ajax({ url: "/rest/status",
+          context: document.body,
+          dataType: "json",
+          success: function(data){
+            statusHtml = '<div class="text-center mt-5"><h5>Status</h5><div id="status" class="row">';
+            if(data.sunrise) {
+              statusHtml += '<div class="col-6"><h5>Sunrising...</h5></div>';
+            } else if(data.sundown) {
+              statusHtml += '<div class="col-6"><h5>Sundowning...</h5></div>';
+            } else {
+              statusHtml += '<div class="col-6"><h5>Nothing to do</div>';
+            }
+            date = new Date(data.time*1000);
+            statusHtml += '<div class="col-6"><h5>Time: '+date.toLocaleDateString()+' '+date.toLocaleTimeString()+'</h5></div>';
+            
+            if(data.sunrise || data.sundown) {
+              statusHtml += '</div>';
+              statusHtml += '<div class="row">';
+              statusHtml += '<button id="stopButton" class="mt-3 btn btn-primary">Stop</button>';
+            }
+            statusHtml += '</div></div>';
+            console.log(statusHtml);
+            console.log($('#statusCenter'));
+            $('#statusCenter').append(statusHtml);
+          }});
+            
       }
       
       function getHourOptions(selected) {
@@ -219,6 +366,22 @@
           }
         }
         return ret;
+      }
+      
+      function getActColor() {
+        console.log("getting act color");
+        $.ajax({ url: "/rest/color",
+          context: document.body,
+          dataType: "json",
+          success: function(data){
+            color_r = data.r;
+            color_g = data.g;
+            color_b = data.b;
+            $('#actColor').css('background-color', 'rgb('+color_r+', '+color_g+', '+color_b+')');
+            console.log('rgb('+color_r+', '+color_g+', '+color_b+')');
+            console.log($('#actColor'));
+          }
+        });
       }
       
       function getDataForDay(day) {

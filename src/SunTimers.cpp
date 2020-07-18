@@ -21,7 +21,6 @@ SunTimer::SunTimer(JsonObject obj) {
     
 }
 SunTimer::~SunTimer() {
-    Serial.println("Desctructor");
     delete this->sunTimer;
 }
 

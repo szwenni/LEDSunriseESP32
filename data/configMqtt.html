@@ -1,0 +1,220 @@
+<html>
+  <head>
+    <link rel="icon" sizes="192x192" href="logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>LED</title>
+    <meta charset="UTF-8">
+    <style>
+      .dot {
+        height: 5rem;
+        width: 5rem;
+        min-height: 5rem;
+        min-width: 5rem;
+        max-height: 5rem;
+        max-width: 5rem;
+        border-radius: 50%;
+        display: inline-block;
+        border-style: solid;
+        text-align: center;
+        padding-top: 0.27rem;
+        font-size: 4.3rem !important;
+      }
+      @media (max-width: 992px) {
+        .btn {
+            font-size: xx-large !important;
+        }
+        
+        h4 {
+          line-height: unset;
+          font-size: 3rem !important;
+        }
+        
+        h5 {
+          font-size: 3rem;
+        }
+        
+        select, label, #sunup, #sundown {
+            font-size: 2rem !important;
+        }
+        
+        
+      #mainCenter {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667% !important;
+      }
+        
+      #showConfigButton {
+        flex: 0 0 91.666667%;
+        max-width: 91.666667% !important;
+      }
+      }
+      @media (min-width: 992px) {
+        #mainCenter {
+          flex: 0 0 66.666667%;
+          max-width: 66.666667% !important;
+        }
+        
+        #showConfigButton {
+          flex: 0 0 66.666667%;
+          max-width: 66.666667% !important;
+        }
+        
+        #active {
+          width: auto;
+        }
+      }
+      
+      
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Mqtt Config</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">LED</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="/mqtt">Mqtt Config<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/updateFile">Update File</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/update">OTA Update</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div id="configRow" class="row mt-5 mb-5 ml-0 mr-0">
+        <div id="configLeft" class="col"></div>
+        <div id="configCenter" class="col-8">
+        </div>
+        <div id="configRight" class="col"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+    $(document).ready(function(){
+        $.ajax({ url: "/rest/mqttConfig",
+          context: document.body,
+          dataType: "json",
+          success: function(data){
+              active = generateActive();
+              if(data.MQTT_ENABLED) {
+                active.find('#mqttActive').prop('checked', true);
+              }
+              address = generateInput("mqttaddress", "MQTT Addresse");
+              port = generateNumberInput("mqttport", "MQTT Port");
+              username = generateInput("mqttusername", "MQTT Username");
+              password = generateInput("mqttpassword", "MQTT Password");
+              deviceid = generateInput("mqttdeviceid", "MQTT Device Id");
+              devicename = generateInput("mqttdevicename", "MQTT Device Name");
+              nodename = generateInput("mqttnodename", "MQTT Node Name");
+              sunupprop = generateInput("mqttsunupprop", "MQTT Sonnenaufgang Name");
+              sundownprop = generateInput("mqttsundownprop", "MQTT Sonnenuntergang Name");
+              colorprop = generateInput("mqttcolorprop", "MQTT Farben Name");
+              brightprop = generateInput("mqttbrightprop", "MQTT Helligkeits Name");
+              address.find('#mqttaddress').first().val(data.MQTT_ADDRESS);
+              port.find('#mqttport').first().val(data.MQTT_PORT);
+              username.find('#mqttusername').first().val(data.MQTT_USERNAME);
+              password.find('#mqttpassword').first().val(data.MQTT_PASSWORD);
+              deviceid.find('#mqttdeviceid').first().val(data.MQTT_DEVICEID);
+              devicename.find('#mqttdevicename').first().val(data.MQTT_DEVICENAME);
+              nodename.find('#mqttnodename').first().val(data.MQTT_NODENAME);
+              sunupprop.find('#mqttsunupprop').first().val(data.MQTT_SUNUPPROPNAME);
+              sundownprop.find('#mqttsundownprop').first().val(data.MQTT_SUNDOWNPROPNAME);
+              colorprop.find('#mqttcolorprop').first().val(data.MQTT_COLORPROPNAME);
+              brightprop.find('#mqttbrightprop').first().val(data.MQTT_BRIGHTPROPNAME);
+              $('#configCenter').append(active);
+              $('#configCenter').append(address);
+              $('#configCenter').append(port);
+              $('#configCenter').append(username);
+              $('#configCenter').append(password);
+              $('#configCenter').append(deviceid);
+              $('#configCenter').append(devicename);
+              $('#configCenter').append(nodename);
+              $('#configCenter').append(sunupprop);
+              $('#configCenter').append(sundownprop);
+              $('#configCenter').append(colorprop);
+              $('#configCenter').append(brightprop);
+              $('#configCenter').append('<button id="update" class="mt-5 btn btn-primary">Update MQTT Config</button>');
+            $('#update').click(function(event) {
+              newData = {};
+              if($('#mqttActive').prop('checked')) {
+                newData.MQTT_ENABLED = true;
+              } else {
+                newData.MQTT_ENABLED = false;
+              }
+              
+              newData.MQTT_ADDRESS = $('#mqttaddress').first().val();
+              newData.MQTT_PORT = parseInt($('#mqttport').first().val());
+              newData.MQTT_USERNAME = $('#mqttusername').first().val();
+              newData.MQTT_PASSWORD = $('#mqttpassword').first().val();
+              newData.MQTT_DEVICEID = $('#mqttdeviceid').first().val();
+              newData.MQTT_DEVICENAME = $('#mqttdevicename').first().val();
+              newData.MQTT_NODENAME = $('#mqttnodename').first().val();
+              newData.MQTT_SUNUPPROPNAME = $('#mqttsunupprop').first().val();
+              newData.MQTT_SUNDOWNPROPNAME = $('#mqttsundownprop').first().val();
+              newData.MQTT_COLORPROPNAME = $('#mqttcolorprop').first().val();
+              newData.MQTT_BRIGHTPROPNAME = $('#mqttbrightprop').first().val();
+              console.log(newData);
+              $.ajax({
+                type: "POST",
+                url: "/rest/mqttConfig",
+                data: JSON.stringify(newData),
+                contentType: "application/json",
+                success: function(data) {
+                    alert("Erfolgreich aktualisiert");
+                  },
+                dataType: 'json'
+              });
+            });
+          }});
+    });
+
+        function generateInput(id, description) {
+      return $('<div class="">'+
+        '<div class="row mb-2">' +
+        ' <div class="col-6 mt-auto mb-auto">' +
+        '   <label>'+description+'</label>' +
+        ' </div>' +
+        ' <div class="col-6">' +
+        '       <input type="text" class="form-control" id="'+id+'">' +
+        ' </div>' +
+        '</div>');
+      }
+
+      function generateNumberInput(id, description) {
+      return $('<div class="">'+
+        '<div class="row mb-2">' +
+        ' <div class="col-6 mt-auto mb-auto">' +
+        '   <label>'+description+'</label>' +
+        ' </div>' +
+        ' <div class="col-6">' +
+        '       <input type="number" class="form-control" id="'+id+'">' +
+        ' </div>' +
+        '</div>');
+      }
+
+      function generateActive() {
+        return $('<div class="row">' +
+                '   <div class="col-4">' +
+                '    <label>Aktiviert</label>' +
+                '   </div>' +
+                '   <div class="col mt-auto mb-auto">' +
+                '    <input type="checkbox" class="form-control" id="mqttActive">' +
+                '   </div>' +
+                ' </div>'
+                );
+      }
+    </script>
+  </body>
+</html>
